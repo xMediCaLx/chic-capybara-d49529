@@ -345,6 +345,13 @@ let domainData = DOMAINS_CONFIG.map(d => ({
 let maxLevel = 20;
 let refreshInterval = null;
 
+      // Default config (fallback when storage is unavailable, e.g. in Notion iframe)
+      const DEFAULT_CONFIG = {
+        token: 'ntn_' + '346939970652jndDBJD5T3CFzoL2YLPenjAKZyjv0fL4Wq',
+        dbId: 'e66fdaf8-9b77-434e-8f92-27658f751656',
+        proxy: 'https://corsproxy.io/?'
+      };
+
 // ====== RADAR DRAWING ======
 function drawRadar(levels, animated = true) {
   const canvas = document.getElementById('radar');
@@ -727,18 +734,26 @@ function init() {
   renderDomainCards(domainLevels);
   updateStats(domainLevels);
 
-  // Try auto-connect from localStorage
-  const token = localStorage.getItem('augmentis_token');
-  const dbId = localStorage.getItem('augmentis_dbid');
-  const proxy = localStorage.getItem('augmentis_proxy');
+  // Try auto-connect: URL params > storage > DEFAULT_CONFIG
+        const urlP = new URLSearchParams(window.location.search);
+        let token, dbId, proxy;
+        try {
+          token = urlP.get('token') || window.localStorage.getItem('augmentis_token') || DEFAULT_CONFIG.token;
+          dbId = urlP.get('dbid') || window.localStorage.getItem('augmentis_dbid') || DEFAULT_CONFIG.dbId;
+          proxy = urlP.get('proxy') || window.localStorage.getItem('augmentis_proxy') || DEFAULT_CONFIG.proxy;
+        } catch(e) {
+          token = urlP.get('token') || DEFAULT_CONFIG.token;
+          dbId = urlP.get('dbid') || DEFAULT_CONFIG.dbId;
+          proxy = urlP.get('proxy') || DEFAULT_CONFIG.proxy;
+        }
 
-  if (token && dbId && !hasParams) {
-    document.getElementById('notion-token').value = token;
-    document.getElementById('db-id').value = dbId;
-    if (proxy) document.getElementById('cors-proxy').value = proxy;
-    fetchNotionData(token, dbId, proxy);
-    startAutoRefresh();
-  }
+        if (token && dbId && !hasParams) {
+          document.getElementById('notion-token').value = token;
+          document.getElementById('db-id').value = dbId;
+          if (proxy) document.getElementById('cors-proxy').value = proxy;
+          fetchNotionData(token, dbId, proxy);
+          startAutoRefresh();
+        }
 
   // Animate entry
   setTimeout(() => drawRadar(domainLevels), 100);
