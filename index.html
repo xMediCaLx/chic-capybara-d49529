@@ -614,11 +614,18 @@ async function fetchNotionData(token, dbId, proxy) {
       }
 
       if (idx >= 0) {
-        // Level (formula)
+        // Level (formula or string)
         const levelProp = page.properties["Level"];
+        let levelNum = 0;
         if (levelProp?.formula?.number !== undefined && levelProp.formula.number !== null) {
-          newLevels[idx] = levelProp.formula.number;
-          newDomainData[idx].level = levelProp.formula.number;
+          levelNum = levelProp.formula.number;
+        } else if (levelProp?.formula?.string) {
+          const m = levelProp.formula.string.match(/\d+/);
+          if (m) levelNum = parseInt(m[0], 10);
+        }
+        if (levelNum > 0) {
+          newLevels[idx] = levelNum;
+          newDomainData[idx].level = levelNum;
         }
 
         // Total EXP (rollup)
