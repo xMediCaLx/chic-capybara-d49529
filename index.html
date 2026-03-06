@@ -352,6 +352,12 @@ let refreshInterval = null;
         proxy: 'https://corsproxy.io/?'
       };
 
+    // CORS proxy fallback chain for different environments
+    const CORS_PROXIES = [
+      { url: 'https://corsproxy.io/?', encode: false },
+      { url: 'https://api.allorigins.win/raw?url=', encode: true }
+    ];
+
 // ====== RADAR DRAWING ======
 function drawRadar(levels, animated = true) {
   const canvas = document.getElementById('radar');
@@ -569,22 +575,36 @@ async function connectNotion() {
   }
 }
 
-async function notionQuery(proxy, token, dbId, body = {}) {
-  const url = `${proxy}https://api.notion.com/v1/databases/${dbId}/query`;
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Notion-Version': '2022-06-28',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-  if (!resp.ok) throw new Error(`HTTP ${resp.status} on DB ${dbId}`);
-  return resp.json();
-}
+async function notionQuery(proxy, token, dbId, body) {
+      body = body || {};
+      var notionUrl = 'https://api.notion.com/v1/databases/' + dbId + '/query';
+      var headers = {
+        'Authorization': 'Bearer ' + token,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
+      };
+      var bodyStr = JSON.stringify(body);
+      var proxiesToTry = [{ url: proxy, encode: false }];
+      for (var j = 0; j < CORS_PROXIES.length; j++) {
+        if (CORS_PROXIES[j].url !== proxy) proxiesToTry.push(CORS_PROXIES[j]);
+      }
+      var lastError = null;
+      for (var i = 0; i < proxiesToTry.length; i++) {
+        var p = proxiesToTry[i];
+        try {
+          var targetUrl = p.encode ? p.url + encodeURIComponent(notionUrl) : p.url + notionUrl;
+          var controller = new AbortController();
+          var tid = setTimeout(function() { controller.abort(); }, 8000);
+          var r = await fetch(targetUrl, { method: 'POST', headers: headers, body: bodyStr, signal: controller.signal });
+          clearTimeout(tid);
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        } catch(e) { lastError = e; console.warn('Proxy failed:', p.url, e.message); }
+      }
+      throw new Error('All CORS proxies failed: ' + (lastError ? lastError.message : ''));
+    }
 
-async function fetchNotionData(token, dbId, proxy) {
+    async function fetchNotionData(token, dbId, proxy) {
   const statusEl = document.getElementById('status-msg');
 
   try {
@@ -697,9 +717,14 @@ async function fetchNotionData(token, dbId, proxy) {
 
 function startAutoRefresh() {
   if (refreshInterval) clearInterval(refreshInterval);
-  const token = localStorage.getItem('augmentis_token');
-  const dbId = localStorage.getItem('augmentis_dbid');
-  const proxy = localStorage.getItem('augmentis_proxy');
+  var token, dbId, proxy;
+      try {
+        token = localStorage.getItem('augmentis_token') || DEFAULT_CONFIG.token;
+        dbId = localStorage.getItem('augmentis_dbid') || DEFAULT_CONFIG.dbId;
+        proxy = localStorage.getItem('augmentis_proxy') || DEFAULT_CONFIG.proxy;
+      } catch(e) {
+        token = DEFAULT_CONFIG.token; dbId = DEFAULT_CONFIG.dbId; proxy = DEFAULT_CONFIG.proxy;
+      }
 
   if (token && dbId) {
     refreshInterval = setInterval(() => {
