@@ -609,6 +609,54 @@ async function notionQuery(proxy, token, dbId, body) {
       throw new Error('All proxies failed: ' + (lastError ? lastError.message : ''));
     }
 
+    async function fetchNotionData(tkn, dbId, proxy) {
+      var statusEl = document.getElementById("status-msg");
+      try {
+        statusEl.className = "status loading";
+        statusEl.textContent = "Chargement des domaines...";
+        var domainsData = await notionQuery(proxy, tkn, dbId, { filter: { property: "Main Class", relation: { is_empty: true } } });
+        var newLevels = [0, 0, 0, 0, 0, 0];
+        var newDD = DOMAINS_CONFIG.map(function() { return { level: 0, totalExp: 0, quests: 0, sessions: 0, missions: 0, inventaire: 0 }; });
+        var totalExp = 0, totalAct = 0;
+        domainsData.results.forEach(function(page) {
+          var tp = page.properties["Domaine de vie zone"];
+          var title = "";
+          if (tp && tp.title && tp.title[0] && tp.title[0].plain_text) title = tp.title[0].plain_text.toLowerCase().trim();
+          var idx = -1;
+          for (var k in DOMAIN_NAMES_MAP) { if (title.includes(k) || title === k) { idx = DOMAIN_NAMES_MAP[k]; break; } }
+          if (idx >= 0) {
+            var lp = page.properties["Level"], ln = 0;
+            if (lp && lp.formula && lp.formula.number !== undefined && lp.formula.number !== null) ln = lp.formula.number;
+            else if (lp && lp.formula && lp.formula.string) { var m = lp.formula.string.match(/\d+/); if (m) ln = parseInt(m[0], 10); }
+            if (ln > 0) { newLevels[idx] = ln; newDD[idx].level = ln; }
+            var ep = page.properties["Total EXP"];
+            if (ep && ep.rollup && ep.rollup.number != null) { newDD[idx].totalExp = ep.rollup.number; totalExp += ep.rollup.number; }
+            var qp = page.properties["Quests"];
+            if (qp && qp.relation) { newDD[idx].quests = qp.relation.length; totalAct += qp.relation.length; }
+            var sp = page.properties["Sessions de Focus"];
+            if (sp && sp.relation) { newDD[idx].sessions = sp.relation.length; totalAct += sp.relation.length; }
+            var mp = page.properties["Missions Soci\u00e9t\u00e9"];
+            if (mp && mp.relation) { newDD[idx].missions = mp.relation.length; totalAct += mp.relation.length; }
+            var ip = page.properties["Inventaire"];
+            if (ip && ip.relation) { newDD[idx].inventaire = ip.relation.length; }
+          }
+        });
+        domainLevels = newLevels; domainData = newDD;
+        maxLevel = Math.max(20, Math.max.apply(null, newLevels) + 5);
+        document.getElementById("total-exp").textContent = totalExp;
+        document.getElementById("quests-done").textContent = totalAct;
+        drawRadar(domainLevels); renderDomainCards(domainLevels); updateStats(domainLevels);
+        var now = new Date().toLocaleTimeString("fr-FR");
+        document.getElementById("update-time").textContent = "Mise \u00e0 jour: " + now;
+        statusEl.className = "status ok";
+        statusEl.innerHTML = "Connect\u00e9 <span class=\"auto-badge\">AUTO<\/span> " + domainsData.results.length + " domaines \u00b7 " + totalAct + " activit\u00e9s \u00b7 " + totalExp + " EXP";
+      } catch (err) {
+        statusEl.className = "status err";
+        statusEl.textContent = "Erreur: " + err.message;
+        console.error("Augmentis Error:", err);
+      }
+    }
+
     function startAutoRefresh() {
   if (refreshInterval) clearInterval(refreshInterval);
   var token, dbId, proxy;
