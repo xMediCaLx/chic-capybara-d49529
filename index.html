@@ -313,21 +313,335 @@
 // ====== DOMAIN CONFIGURATION ======
 const DOMAINS_CONFIG = [
   { key: "sante",       name: "Santé",       icon: "💟", color: "#ef4444", notionId: "31a813ec-6209-8156-a685-c591275ed49c" },
-  { key: "sociabilite", name: "Sociabilité", icon: "☸️", color: "#3b82f6", notionId: "31a813ec-6209-814a-a4ba-d88ba62b7b16" },
-  { key: "enseignement",name: "Enseignement",icon: "⚛️", color: "#eab308", notionId: "31a813ec-6209-8130-b75a-ee6cbe9b4811" },
-  { key: "croyances",   name: "Croyances",   icon: "☮️", color: "#22c55e", notionId: "31a813ec-6209-81b6-addf-ea56f0f114df" },
-  { key: "possessions", name: "Possessions", icon: "♎️", color: "#ec4899", notionId: "31a813ec-6209-8133-8ce3-c865276c8d30" },
-  { key: "securite",    name: "Sécurité",    icon: "🛐", color: "#6b7280", notionId: "31a813ec-6209-811c-ac32-eb1f967753ff" }
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Augmentis â Radar des Domaines de Vie</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #16213e 100%);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header .subtitle {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 8px 20px;
+    text-align: center;
+    min-width: 80px;
+  }
+
+  .stat-card .value {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .stat-card .label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .radar-container {
+    position: relative;
+    margin: 8px 0 16px;
+  }
+
+  .domains-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 16px;
+  }
+
+  .domain-card {
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 3px solid;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .domain-card:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateX(2px);
+    box-shadow: 0 0 20px rgba(139,92,246,0.15);
+  }
+
+  .domain-card .icon { font-size: 18px; }
+  .domain-card .info .name { font-size: 12px; font-weight: 600; }
+  .domain-card .info .level-text { font-size: 10px; color: rgba(255,255,255,0.5); }
+  .domain-card .info .exp-detail { font-size: 9px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+  .progress-bar {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  .progress-bar .fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .link-badge {
+    display: inline-block;
+    font-size: 8px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(139,92,246,0.2);
+    color: #8b5cf6;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .config-panel {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 16px;
+    width: 100%;
+    max-width: 420px;
+    margin-top: 8px;
+  }
+
+  .config-panel summary {
+    cursor: pointer;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+  }
+
+  .config-panel input[type="password"],
+  .config-panel input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    margin: 6px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 12px;
+    font-family: monospace;
+  }
+
+  .config-panel button {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 6px;
+    width: 100%;
+    transition: opacity 0.2s;
+  }
+
+  .config-panel button:hover { opacity: 0.85; }
+
+  .config-panel label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    display: block;
+    margin-top: 8px;
+  }
+
+  .status {
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  .status.ok { background: rgba(34,197,94,0.2); color: #22c55e; }
+  .status.err { background: rgba(239,68,68,0.2); color: #ef4444; }
+  .status.loading { background: rgba(139,92,246,0.2); color: #8b5cf6; }
+
+  .footer {
+    font-size: 9px;
+    color: rgba(255,255,255,0.2);
+    margin-top: 16px;
+    text-align: center;
+  }
+
+  .auto-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    background: rgba(34,197,94,0.15);
+    color: #22c55e;
+    border: 1px solid rgba(34,197,94,0.3);
+  }
+
+  .db-links {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  .db-link {
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .db-link:hover {
+    background: rgba(139,92,246,0.15);
+    border-color: rgba(139,92,246,0.3);
+    color: #8b5cf6;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>AUGMENTIS</h1>
+  <div class="subtitle">Interface de vie â Radar des Domaines</div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="value" id="total-level" style="color:#8b5cf6">0</div>
+    <div class="label">Level Total</div>
+  </div>
+  <div class="stat-card">
+    <div class="value" id="total-exp" style="color:#06b6d4">0</div>
+    <div class="label">Combined EXP</div>
+  </div>
+  <div class="stat-card">
+    <div class="value" id="rank-display" style="color:#22c55e">E</div>
+    <div class="label">Rang</div>
+  </div>
+  <div class="stat-card">
+    <div class="value" id="quests-done" style="color:#eab308">0</div>
+    <div class="label">ActivitÃ©s</div>
+  </div>
+</div>
+
+<div class="radar-container">
+  <canvas id="radar" width="400" height="400"></canvas>
+</div>
+
+<div class="db-links" id="db-links">
+  <a class="db-link" href="https://www.notion.so/e66fdaf89b77434e8f9227658f751656" target="_blank">ð Domaines de vie</a>
+  <a class="db-link" href="https://www.notion.so/0f163621ff654e2a82cee0cc6495bc62" target="_blank">âï¸ Ãpreuves</a>
+  <a class="db-link" href="https://www.notion.so/f4caecd951774429aff37459b4fd3e25" target="_blank">ð§  Sessions de Focus</a>
+  <a class="db-link" href="https://www.notion.so/7346cb47f005464ca54d9a04d9a1600e" target="_blank">ð Inventaire</a>
+  <a class="db-link" href="https://www.notion.so/9cb0de3b26e448728391348b5daecca6c" target="_blank">ð¢ Missions SociÃ©tÃ©</a>
+</div>
+
+<div class="domains-grid" id="domains-grid"></div>
+
+<details class="config-panel">
+  <summary>CONFIGURATION NOTION API</summary>
+  <label>Notion Integration Token (secret_...)</label>
+  <input type="password" id="notion-token" placeholder="secret_xxxxxxxxxxxxxxxxxxxxxxxx">
+  <label>Database ID â Domaine de vie</label>
+  <input type="text" id="db-id" value="e66fdaf8-9b77-434e-8f92-27658f751656" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+  <label>CORS Proxy URL (nÃ©cessaire pour le navigateur)</label>
+  <input type="text" id="cors-proxy" value="https://corsproxy.io/?" placeholder="https://corsproxy.io/?">
+  <label>
+    <input type="checkbox" id="auto-refresh" checked> Auto-refresh toutes les 5 minutes
+  </label>
+  <button onclick="connectNotion()">Connecter Ã  Notion</button>
+  <div id="status-msg"></div>
+</details>
+
+<div class="footer">
+  <span id="update-time"></span>
+  <br>Augmentis v1.0 â Gamification de vie â Mehdi
+</div>
+
+<script>
+// ====== DOMAIN CONFIGURATION ======
+const DOMAINS_CONFIG = [
+  { key: "sante",       name: "SantÃ©",       icon: "ð", color: "#ef4444", notionId: "8d362827-6d73-42e8-9c17-f954c86f63fa" },
+  { key: "sociabilite", name: "SociabilitÃ©", icon: "â¸ï¸", color: "#3b82f6", notionId: "36b484fd-f93e-4b93-a212-7ad15dd766ca" },
+  { key: "enseignement",name: "Enseignement",icon: "âï¸", color: "#eab308", notionId: "8901bd49-6bc5-4bdb-ba07-d3c0c6675cd7" },
+  { key: "croyances",   name: "Croyances",   icon: "â®ï¸", color: "#22c55e", notionId: "d6a22e39-b7e6-4771-acfe-c70f5abdddfe" },
+  { key: "possessions", name: "Possessions", icon: "âï¸", color: "#ec4899", notionId: "ad7e9326-5d9f-4f4a-b502-3f89da2f0ac2" },
+  { key: "securite",    name: "SÃ©curitÃ©",    icon: "ð", color: "#6b7280", notionId: "affebfa4-7f3a-4302-bb97-68a644f5d975" }
 ];
 
-// Map title text (lowercase) → domain index
+// Map title text (lowercase) â domain index
 const DOMAIN_NAMES_MAP = {
-  "santé": 0, "la santé": 0, "sante": 0,
-  "sociabilité": 1, "la sociabilité": 1, "sociabilite": 1,
+  "santÃ©": 0, "la santÃ©": 0, "sante": 0,
+  "sociabilitÃ©": 1, "la sociabilitÃ©": 1, "sociabilite": 1,
   "enseignement": 2, "l'enseignement": 2,
   "croyances": 3, "les croyances": 3,
   "possessions": 4, "les possessions": 4,
-  "sécurité": 5, "la sécurité": 5, "securite": 5
+  "sÃ©curitÃ©": 5, "la sÃ©curitÃ©": 5, "securite": 5
 };
 
 // Notion Database IDs for linked databases
@@ -497,17 +811,17 @@ function renderDomainCards(levels) {
 
     // Build activity detail line
     const details = [];
-    if (dd.quests > 0) details.push(`${dd.quests} épreuves`);
+    if (dd.quests > 0) details.push(`${dd.quests} Ã©preuves`);
     if (dd.sessions > 0) details.push(`${dd.sessions} sessions`);
     if (dd.missions > 0) details.push(`${dd.missions} missions`);
-    const detailStr = details.length > 0 ? details.join(' · ') : '';
+    const detailStr = details.length > 0 ? details.join(' Â· ') : '';
 
     grid.innerHTML += `
       <a class="domain-card" href="${notionUrl}" target="_blank" style="border-left-color:${d.color}">
         <div class="icon">${d.icon}</div>
         <div class="info" style="flex:1">
-          <div class="name">${d.name} <span class="link-badge">NOTION ↗</span></div>
-          <div class="level-text">Level ${levels[i]} — ${titleText}</div>
+          <div class="name">${d.name} <span class="link-badge">NOTION â</span></div>
+          <div class="level-text">Level ${levels[i]} â ${titleText}</div>
           ${detailStr ? `<div class="exp-detail">${detailStr}</div>` : ''}
           <div class="progress-bar">
             <div class="fill" style="width:${pct}%;background:${d.color}"></div>
@@ -519,15 +833,15 @@ function renderDomainCards(levels) {
 }
 
 function getTitre(level) {
-  if (level >= 1000) return "Monarch 👑";
-  if (level >= 640) return "Grand Marshal 🎖️🎖️";
-  if (level >= 320) return "Marshal 🎖️";
-  if (level >= 160) return "Commander 🏅";
-  if (level >= 80) return "Elite Knight ✴️";
-  if (level >= 40) return "Knight ❇️";
-  if (level >= 20) return "Elite 🥇";
-  if (level >= 10) return "Soldier 🥈";
-  return "Beginner 🥉";
+  if (level >= 1000) return "Monarch ð";
+  if (level >= 640) return "Grand Marshal ðï¸ðï¸";
+  if (level >= 320) return "Marshal ðï¸";
+  if (level >= 160) return "Commander ð";
+  if (level >= 80) return "Elite Knight â´ï¸";
+  if (level >= 40) return "Knight âï¸";
+  if (level >= 20) return "Elite ð¥";
+  if (level >= 10) return "Soldier ð¥";
+  return "Beginner ð¥";
 }
 
 function getRank(totalLevel) {
@@ -625,12 +939,12 @@ async function notionQuery(proxy, token, dbId, body) {
           var idx = -1;
           for (var k in DOMAIN_NAMES_MAP) { if (title.includes(k) || title === k) { idx = DOMAIN_NAMES_MAP[k]; break; } }
           if (idx >= 0) {
-            var lp = page.properties["Level"], ln = 0;
+            var lp = page.properties["Level Formula"], ln = 0;
             if (lp && lp.formula && lp.formula.number !== undefined && lp.formula.number !== null) ln = lp.formula.number;
             else if (lp && lp.formula && lp.formula.string) { var m = lp.formula.string.match(/\d+/); if (m) ln = parseInt(m[0], 10); }
             if (ln > 0) { newLevels[idx] = ln; newDD[idx].level = ln; }
-            var ep = page.properties["Total EXP"];
-            if (ep && ep.rollup && ep.rollup.number != null) { newDD[idx].totalExp = ep.rollup.number; totalExp += ep.rollup.number; }
+            var ep = page.properties["Combined EXP"];
+            if (ep && ep.formula && ep.formula.number != null) { newDD[idx].totalExp = ep.formula.number; totalExp += ep.formula.number; } else if (ep && ep.rollup && ep.rollup.number != null) { newDD[idx].totalExp = ep.rollup.number; totalExp += ep.rollup.number; }
             var qp = page.properties["Quests"];
             if (qp && qp.relation) { newDD[idx].quests = qp.relation.length; totalAct += qp.relation.length; }
             var sp = page.properties["Sessions de Focus"];
