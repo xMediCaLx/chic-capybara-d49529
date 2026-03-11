@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Augmentis â Radar des Domaines de Vie</title>
+<title>Augmentis — Radar des Domaines de Vie</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -253,7 +253,7 @@
 
 <div class="header">
   <h1>AUGMENTIS</h1>
-  <div class="subtitle">Interface de vie â Radar des Domaines</div>
+  <div class="subtitle">Interface de vie — Radar des Domaines</div>
 </div>
 
 <div class="stats-row">
@@ -271,7 +271,7 @@
   </div>
   <div class="stat-card">
     <div class="value" id="quests-done" style="color:#eab308">0</div>
-    <div class="label">ActivitÃ©s</div>
+    <div class="label">Activités</div>
   </div>
 </div>
 
@@ -280,11 +280,11 @@
 </div>
 
 <div class="db-links" id="db-links">
-  <a class="db-link" href="https://www.notion.so/e66fdaf89b77434e8f9227658f751656" target="_blank">ð Domaines de vie</a>
-  <a class="db-link" href="https://www.notion.so/0f163621ff654e2a82cee0cc6495bc62" target="_blank">âï¸ Ãpreuves</a>
-  <a class="db-link" href="https://www.notion.so/f4caecd951774429aff37459b4fd3e25" target="_blank">ð§  Sessions de Focus</a>
-  <a class="db-link" href="https://www.notion.so/7346cb47f005464ca54d9a04d9a1600e" target="_blank">ð Inventaire</a>
-  <a class="db-link" href="https://www.notion.so/9cb0de3b26e448728391348b5daecca6c" target="_blank">ð¢ Missions SociÃ©tÃ©</a>
+  <a class="db-link" href="https://www.notion.so/e66fdaf89b77434e8f9227658f751656" target="_blank">📊 Domaines de vie</a>
+  <a class="db-link" href="https://www.notion.so/0f163621ff654e2a82cee0cc6495bc62" target="_blank">⚔️ Épreuves</a>
+  <a class="db-link" href="https://www.notion.so/f4caecd951774429aff37459b4fd3e25" target="_blank">🧠 Sessions de Focus</a>
+  <a class="db-link" href="https://www.notion.so/7346cb47f005464ca54d9a04d9a1600e" target="_blank">🎒 Inventaire</a>
+  <a class="db-link" href="https://www.notion.so/9cb0de3b26e448728391348b5daecca6c" target="_blank">🏢 Missions Société</a>
 </div>
 
 <div class="domains-grid" id="domains-grid"></div>
@@ -293,41 +293,41 @@
   <summary>CONFIGURATION NOTION API</summary>
   <label>Notion Integration Token (secret_...)</label>
   <input type="password" id="notion-token" placeholder="secret_xxxxxxxxxxxxxxxxxxxxxxxx">
-  <label>Database ID â Domaine de vie</label>
+  <label>Database ID — Domaine de vie</label>
   <input type="text" id="db-id" value="e66fdaf8-9b77-434e-8f92-27658f751656" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
-  <label>CORS Proxy URL (nÃ©cessaire pour le navigateur)</label>
+  <label>CORS Proxy URL (nécessaire pour le navigateur)</label>
   <input type="text" id="cors-proxy" value="https://corsproxy.io/?" placeholder="https://corsproxy.io/?">
   <label>
     <input type="checkbox" id="auto-refresh" checked> Auto-refresh toutes les 5 minutes
   </label>
-  <button onclick="connectNotion()">Connecter Ã  Notion</button>
+  <button onclick="connectNotion()">Connecter à Notion</button>
   <div id="status-msg"></div>
 </details>
 
 <div class="footer">
   <span id="update-time"></span>
-  <br>Augmentis v1.0 â Gamification de vie â Mehdi
+  <br>Augmentis v1.0 — Gamification de vie — Mehdi
 </div>
 
 <script>
 // ====== DOMAIN CONFIGURATION ======
 const DOMAINS_CONFIG = [
-  { key: "sante",       name: "SantÃ©",       icon: "ð", color: "#ef4444", notionId: "31a813ec-6209-8156-a685-c591275ed49c" },
-  { key: "sociabilite", name: "SociabilitÃ©", icon: "â¸ï¸", color: "#3b82f6", notionId: "31a813ec-6209-814a-a4ba-d88ba62b7b16" },
-  { key: "enseignement",name: "Enseignement",icon: "âï¸", color: "#eab308", notionId: "31a813ec-6209-8130-b75a-ee6cbe9b4811" },
-  { key: "croyances",   name: "Croyances",   icon: "â®ï¸", color: "#22c55e", notionId: "31a813ec-6209-81b6-addf-ea56f0f114df" },
-  { key: "possessions", name: "Possessions", icon: "âï¸", color: "#ec4899", notionId: "31a813ec-6209-8133-8ce3-c865276c8d30" },
-  { key: "securite",    name: "SÃ©curitÃ©",    icon: "ð", color: "#6b7280", notionId: "31a813ec-6209-811c-ac32-eb1f967753ff" }
+  { key: "sante",       name: "Santé",       icon: "💟", color: "#ef4444", notionId: "31a813ec-6209-8156-a685-c591275ed49c" },
+  { key: "sociabilite", name: "Sociabilité", icon: "☸️", color: "#3b82f6", notionId: "31a813ec-6209-814a-a4ba-d88ba62b7b16" },
+  { key: "enseignement",name: "Enseignement",icon: "⚛️", color: "#eab308", notionId: "31a813ec-6209-8130-b75a-ee6cbe9b4811" },
+  { key: "croyances",   name: "Croyances",   icon: "☮️", color: "#22c55e", notionId: "31a813ec-6209-81b6-addf-ea56f0f114df" },
+  { key: "possessions", name: "Possessions", icon: "♎️", color: "#ec4899", notionId: "31a813ec-6209-8133-8ce3-c865276c8d30" },
+  { key: "securite",    name: "Sécurité",    icon: "🛐", color: "#6b7280", notionId: "31a813ec-6209-811c-ac32-eb1f967753ff" }
 ];
 
-// Map title text (lowercase) â domain index
+// Map title text (lowercase) → domain index
 const DOMAIN_NAMES_MAP = {
-  "santÃ©": 0, "la santÃ©": 0, "sante": 0,
-  "sociabilitÃ©": 1, "la sociabilitÃ©": 1, "sociabilite": 1,
+  "santé": 0, "la santé": 0, "sante": 0,
+  "sociabilité": 1, "la sociabilité": 1, "sociabilite": 1,
   "enseignement": 2, "l'enseignement": 2,
   "croyances": 3, "les croyances": 3,
   "possessions": 4, "les possessions": 4,
-  "sÃ©curitÃ©": 5, "la sÃ©curitÃ©": 5, "securite": 5
+  "sécurité": 5, "la sécurité": 5, "securite": 5
 };
 
 // Notion Database IDs for linked databases
@@ -497,17 +497,17 @@ function renderDomainCards(levels) {
 
     // Build activity detail line
     const details = [];
-    if (dd.quests > 0) details.push(`${dd.quests} Ã©preuves`);
+    if (dd.quests > 0) details.push(`${dd.quests} épreuves`);
     if (dd.sessions > 0) details.push(`${dd.sessions} sessions`);
     if (dd.missions > 0) details.push(`${dd.missions} missions`);
-    const detailStr = details.length > 0 ? details.join(' Â· ') : '';
+    const detailStr = details.length > 0 ? details.join(' · ') : '';
 
     grid.innerHTML += `
       <a class="domain-card" href="${notionUrl}" target="_blank" style="border-left-color:${d.color}">
         <div class="icon">${d.icon}</div>
         <div class="info" style="flex:1">
-          <div class="name">${d.name} <span class="link-badge">NOTION â</span></div>
-          <div class="level-text">Level ${levels[i]} â ${titleText}</div>
+          <div class="name">${d.name} <span class="link-badge">NOTION ↗</span></div>
+          <div class="level-text">Level ${levels[i]} — ${titleText}</div>
           ${detailStr ? `<div class="exp-detail">${detailStr}</div>` : ''}
           <div class="progress-bar">
             <div class="fill" style="width:${pct}%;background:${d.color}"></div>
@@ -519,15 +519,15 @@ function renderDomainCards(levels) {
 }
 
 function getTitre(level) {
-  if (level >= 1000) return "Monarch ð";
-  if (level >= 640) return "Grand Marshal ðï¸ðï¸";
-  if (level >= 320) return "Marshal ðï¸";
-  if (level >= 160) return "Commander ð";
-  if (level >= 80) return "Elite Knight â´ï¸";
-  if (level >= 40) return "Knight âï¸";
-  if (level >= 20) return "Elite ð¥";
-  if (level >= 10) return "Soldier ð¥";
-  return "Beginner ð¥";
+  if (level >= 1000) return "Monarch 👑";
+  if (level >= 640) return "Grand Marshal 🎖️🎖️";
+  if (level >= 320) return "Marshal 🎖️";
+  if (level >= 160) return "Commander 🏅";
+  if (level >= 80) return "Elite Knight ✴️";
+  if (level >= 40) return "Knight ❇️";
+  if (level >= 20) return "Elite 🥇";
+  if (level >= 10) return "Soldier 🥈";
+  return "Beginner 🥉";
 }
 
 function getRank(totalLevel) {
